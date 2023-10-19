@@ -1,0 +1,368 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Drawing;
+using System.IO;
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
+
+
+namespace Erhans_cA_1
+{
+    /*class Program
+    {
+        static void Main(string[] args)
+        {
+
+        }
+    }*/
+    class RunTime
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World");
+            while (true)
+            {
+
+            }
+
+
+        }
+    }
+    namespace graphics
+    {
+        public class OpenGLRenderer : GameWindow
+        {
+            private List<item.Gobject> objectsToRender;
+            private graphics.Camera camera;
+
+            public OpenGLRenderer(int width, int height, string title) : base(width, height, GraphicsMode.Default, title)
+            {
+                objectsToRender = new List<item.Gobject>();
+                camera = new graphics.Camera();
+            }
+
+            protected override void OnLoad(EventArgs e)
+            {
+                GL.ClearColor(Color4.Black);
+            }
+
+            protected override void OnResize(EventArgs e)
+            {
+                GL.Viewport(0, 0, Width, Height);
+            }
+
+            protected override void OnRenderFrame(FrameEventArgs e)
+            {
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                GL.MatrixMode(MatrixMode.Modelview);
+                GL.LoadIdentity();
+
+                GL.Translate(-camera.x, -camera.y, -camera.z);
+
+                foreach (var obj in objectsToRender)
+                {
+                    var mesh = obj.give_mesh();
+
+                    GL.Begin(PrimitiveType.Triangles);
+
+                    foreach (var face in mesh.give_faces())
+                    {
+                        var vertexIndices = face.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                                                 .Skip(1)
+                                                 .Select(int.Parse);
+
+                        foreach (var index in vertexIndices)
+                        {
+                            var vertex = mesh.give_verts()[index - 1].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                            float x = float.Parse(vertex[1]);
+                            float y = float.Parse(vertex[2]);
+                            float z = float.Parse(vertex[3]);
+
+                            GL.Vertex3(x, y, z);
+                        }
+                    }
+
+                    GL.End();
+                }
+
+                SwapBuffers();
+            }
+
+
+            public void SetObjectsToRender(List<item.Gobject> objects)
+            {
+                objectsToRender = objects;
+            }
+
+            public void SetCamera(graphics.Camera cam)
+            {
+                camera = cam;
+            }
+        }
+        public class Camera
+        {
+            public double x;
+            public double y;
+            public double z;
+
+            public void Move(double dx, double dy, double dz)
+            {
+                x += dx;
+                y += dy;
+                z += dz;
+            }
+
+            public void SetPosition(double x, double y, double z)
+            {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+        }
+        public class MeshGenerator
+        {
+            public static (List<string> vertices, List<string> faces) GenerateCubeMesh()
+            {
+                var vertices = new List<string>
+            {
+                "v -0.5 -0.5 -0.5",
+                "v -0.5 -0.5 0.5",
+                "v -0.5 0.5 -0.5",
+                "v -0.5 0.5 0.5",
+                "v 0.5 -0.5 -0.5",
+                "v 0.5 -0.5 0.5",
+                "v 0.5 0.5 -0.5",
+                "v 0.5 0.5 0.5"
+            };
+
+                var faces = new List<string>
+            {
+                "f 1 2 4 3",
+                "f 5 6 8 7",
+                "f 1 2 6 5",
+                "f 2 4 8 6",
+                "f 4 3 7 8",
+                "f 3 1 5 7"
+            };
+
+                return (vertices, faces);
+            }
+        }
+    }
+
+
+
+
+
+
+
+}
+namespace item
+{
+    public class position
+    {
+        public double x;
+        public double y;
+        public double z;
+        public double xv;
+        public double yv;
+        public double zv;
+        public double xa;
+        public double ya;
+        public double za;
+        public bool staticized;
+        public bool gravity;
+        public position(double x, double y, double z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.staticized = true;
+        }
+        public void staticiz()
+        {
+            if (this.staticized == true)
+            {
+                this.staticized = false;
+            }
+            if (this.staticized == false)
+            {
+                this.staticized = true;
+            }
+        }
+        public void gravitize()
+        {
+            if (this.gravity == true)
+            {
+                this.gravity = false;
+            }
+            if (this.gravity == false)
+            {
+                this.gravity = true;
+            }
+        }
+        public void changevelocity(double xv, double yv, double zv)
+        {
+            this.xv = xv;
+            this.yv = yv;
+            this.zv = zv;
+        }
+        public void changeacceleration(double xa, double ya, double za)
+        {
+            this.xa = xa;
+            this.ya = ya;
+            this.za = za;
+        }
+        public void forceapply(double xa, double ya, double za)
+        {
+            this.xa += xa;
+            this.ya += ya;
+            this.za += za;
+        }
+        public void positiontick()
+        {
+            if (!this.staticized)
+            {
+
+                if (this.gravity)
+                {
+                    // if statement checking if there is anything in the specific direction so we dont collide with anything
+                    this.x += (this.xv + (this.xa / 2));
+                    // if statement checking if there is anything in the specific direction so we dont collide with anything
+                    this.y += (this.yv + (this.ya / 2));
+                    // if statement checking if there is anything in the specific direction so we dont collide with anything
+                    this.z += (this.yv + (this.ya / 2));
+                    this.xv += this.xa;
+                    this.yv += (this.ya - .1531);
+                    this.zv += this.za;
+                }
+                else
+                {
+                    // if statement checking if there is anything in the specific direction so we dont collide with anything
+                    this.x += (this.xv + (this.xa / 2));
+                    // if statement checking if there is anything in the specific direction so we dont collide with anything
+                    this.y += (this.yv + (this.ya / 2));
+                    // if statement checking if there is anything in the specific direction so we dont collide with anything
+                    this.z += (this.yv + (this.ya / 2));
+                    this.xv += this.xa;
+                    this.yv += this.ya;
+                    this.zv += this.za;
+                }
+            }
+
+        }
+
+    }
+    public class mesh
+    {
+        private List<string> vertices;
+        private List<string> faces;
+        public mesh()
+        {
+            vertices = new List<string>();
+            faces = new List<string>();
+        }
+        public List<string> give_faces()
+        {
+            return this.faces;
+        }
+        public List<string> give_verts()
+        {
+            return this.vertices;
+        }
+        public void LoadFromObj(string filePath)
+        {
+            try
+            {
+                using (StreamReader sr = new StreamReader(filePath))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        if (line.StartsWith("v "))
+                        {
+                            vertices.Add(line);
+                        }
+                        else if (line.StartsWith("f "))
+                        {
+                            faces.Add(line);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error:  " + ex.Message);
+            }
+        }
+        public void SetMeshData(List<string> vertices, List<string> faces)
+        {
+            this.vertices = vertices;
+            this.faces = faces;
+        }
+    }
+    public class Gobject
+    {
+        position pos;
+        mesh mes;
+        public double wheight;
+        public Gobject(position p, mesh m,double wheight)
+        {
+            this.pos = p;
+            this.mes = m;
+            this.wheight = wheight;
+        }
+        public mesh give_mesh()
+        {
+            return this.mes;
+        }
+        public void motion()
+        {
+            this.pos.positiontick();
+        }
+        public double give_x()
+        {
+            return this.pos.x;
+        }
+        public double give_y()
+        {
+            return this.pos.y;
+        }
+        public double give_z()
+        {
+            return this.pos.z;
+        }
+        public void apply_force(double forcex,double forcey, double forcez)
+        {
+            double x = (forcex / this.wheight);
+            double y = (forcey / this.wheight);
+            double z = (forcez / this.wheight);
+            this.pos.forceapply(x, y, z);
+        }
+        public Dictionary properties = new Dictionary();
+        public void add_properite(string name,List<double> value)
+        {
+            if (properties.ContainsKey(name))
+            {
+                properties.Remove(name);
+            }
+            properties.Add(name,value);
+        }
+    }
+}
+namespace Eobject_specail//this will be for special attributes of objects
+{
+    public class hit_box()
+    {
+        public List<double> list;
+        public hit_box(public item.Gobject)
+        {
+            item.Gobject.add_properite(name,list)
+        }
+    }
+}
