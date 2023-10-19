@@ -308,8 +308,9 @@ namespace item
     }
     public class Gobject
     {
-        position pos;
-        mesh mes;
+        public position pos;
+        public Dictionary properties = new Dictionary();
+        public mesh mes;
         public double wheight;
         public Gobject(position p, mesh m,double wheight)
         {
@@ -344,25 +345,43 @@ namespace item
             double z = (forcez / this.wheight);
             this.pos.forceapply(x, y, z);
         }
-        public Dictionary properties = new Dictionary();
-        public void add_properite(string name,List<double> value)
-        {
-            if (properties.ContainsKey(name))
-            {
-                properties.Remove(name);
-            }
-            properties.Add(name,value);
-        }
+        
     }
 }
-namespace Eobject_specail//this will be for special attributes of objects
+namespace Eobject_specail//this is the propertie stuff
 {
-    public class hit_box()
+    public class propertie
     {
+        this.name;
+        this.thing;
         public List<double> list;
-        public hit_box(public item.Gobject)
+        public propertie(item.Gobject thing, string name)
         {
-            item.Gobject.add_properite(name,list)
+            this.list = list;
+            this.thing = thing;
+            this.name = name;
+            if (this.thing.properties.ContainsKey(name))
+            {
+                this.thing.properties.Remove(name);
+            }
+            this.thing.properties.Add(this.name, this.list);
+            
         }
+
+        public void remove_prop()
+        {
+            this.thing.properties.Remove(this.name);
+            public void DeleteObject (object this);
+        }
+        public void change_list(List<double> new_list)
+        {
+            this.list = new_list;
+            if (this.thing.properties.ContainsKey(name))
+            {
+                this.thing.properties.Remove(name);
+            }
+            this.thing.properties.Add(this.name, this.list);
+        }
+
     }
 }
