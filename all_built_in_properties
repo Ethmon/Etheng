@@ -1,0 +1,22 @@
+this is an explanation for what each variable represents for each variable
+
+
+hit_box
+    var1, this is a 1 or 0, determines whether collison is enabled
+    var2, this is the proportions of the hitbox, 1 being same size, 2 being doubled, and so on.
+    var3, this is the count for how many variables after this one will be atributed to a function.
+        var3_#, this is the double that corrispondes with a function that this object should preforme.
+    var4, 
+animation
+  var1, lists how many animations there will be
+    varX_1, lists speed of anim
+    varX_2, lists number of frames
+      varX_2_Y, gives directory to frame
+Inputs
+  var1, tells you how many inputs there will be
+  var#, what key is input
+    var#_#, what function is activated
+Children
+  var1, 1 or 0 tests tells it weather to move with the parent
+  var2, how many children are there
+  var2+#, the ID of the children
